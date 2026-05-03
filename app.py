@@ -31,7 +31,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev_secret_key')
 
 # Configure Google AI Client
-genai_client = Client(api_key="")
+genai_client = Client(api_key="Burada API var")
 
 # Import database and authentication utilities
 from database import db
