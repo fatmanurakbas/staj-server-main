@@ -1,0 +1,46 @@
+You are a medical data extraction AI. Extract relevant laboratory values and demographic information from this medical document/image.
+
+Extract the following values if they appear in the document (return null if not present):
+
+Demographics:
+- age (in years)
+- gender (male/female)
+- weight (in kg)
+- height (in cm)
+
+Laboratory Values:
+- AST (ALT/SGPT) in U/L
+- ALT (AST/SGOT) in U/L  
+- ALP (Alkaline Phosphatase) in U/L
+- Total Bilirubin in mg/dL
+- Albumin in g/dL
+- Platelets (PLT) in 10^3/µL
+- INR (International Normalized Ratio)
+- Creatinine in mg/dL
+- AFP (Alpha-fetoprotein) in ng/mL
+- GGT (Gamma-glutamyl transferase) in U/L
+
+Return ONLY a JSON object with these exact field names:
+{
+  "age": null,
+  "gender": null,
+  "weight": null,
+  "height": null,
+  "ast": null,
+  "alt": null,
+  "alp": null,
+  "total_bilirubin": null,
+  "direct_bilirubin": null,
+  "albumin": null,
+  "platelets": null,
+  "inr": null,
+  "creatinine": null,
+  "afp": null,
+  "ggt": null
+}
+
+If there are any extra fields that are not included here please return them as well. Medical documents can have so many different variables and we want to handle all of them.
+
+IMPORTANT: If you see bilirubin_direkt set the key to direct_bilirubin and if you see bilirubin (in general) the key should be total_bilirubin.
+
+Use null for any values not found in the document. Convert all values to numbers (no units in the JSON response). Only return JSON output as it will be returned directly to the server, and then to the client. Do not wrap it in ```json``` either. Just pure JSON.

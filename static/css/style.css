@@ -1,0 +1,822 @@
+/* Custom CSS for LiverAId */
+
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #0dcaf0;
+    --light-gray: #f8f9fa;
+    --border-radius: 0.375rem;
+}
+
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-gray);
+}
+
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-header {
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+    font-weight: 600;
+}
+
+/* Form Styles */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.input-group-text {
+    background-color: var(--light-gray);
+    border-color: #ced4da;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Badge Styles */
+.badge {
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Progress Bar Styles */
+.progress {
+    background-color: #e9ecef;
+    border-radius: var(--border-radius);
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* Risk Level Colors */
+.text-low-risk { color: var(--success-color) !important; }
+.text-moderate-risk { color: var(--warning-color) !important; }
+.text-high-risk { color: var(--danger-color) !important; }
+
+.bg-low-risk { background-color: var(--success-color) !important; }
+.bg-moderate-risk { background-color: var(--warning-color) !important; }
+.bg-high-risk { background-color: var(--danger-color) !important; }
+
+/* Score Display */
+.score-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.score-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.score-interpretation {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Results Grid */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Risk Summary */
+.risk-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.risk-summary .display-4 {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Accordion Customization */
+.accordion-button {
+    background-color: transparent;
+    font-weight: 600;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.accordion-body {
+    background-color: #f8f9fa;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+}
+
+/* Footer */
+footer {
+    border-top: 1px solid #dee2e6;
+    margin-top: 3rem;
+}
+
+/* Chatbot Widget Styles */
+.chatbot-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 400px;
+    max-width: calc(100vw - 40px);
+    height: 500px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    z-index: 1050;
+    animation: slideInUp 0.3s ease-out;
+    transition: all 0.3s ease;
+    resize: both;
+    overflow: hidden;
+    min-width: 350px;
+    min-height: 400px;
+}
+
+.chatbot-widget.expanded {
+    width: 600px;
+    height: 700px;
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 40px);
+}
+
+.chatbot-widget.fullscreen {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    border-radius: 8px;
+}
+
+/* Resize handle indicator */
+.chatbot-widget:not(.fullscreen)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(-45deg, transparent 30%, #ccc 30%, #ccc 35%, transparent 35%, transparent 65%, #ccc 65%, #ccc 70%, transparent 70%);
+    cursor: nw-resize;
+    pointer-events: none;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.chatbot-header {
+    background: linear-gradient(135deg, var(--primary-color), #495057);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-title {
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.chatbot-controls {
+    display: flex;
+    align-items: center;
+}
+
+.chatbot-body {
+    flex: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chatbot-role-selector {
+    margin-bottom: 10px;
+}
+
+.chatbot-role-selector label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.chatbot-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-bottom: 10px;
+}
+
+.chatbot-message {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    line-height: 1.4;
+    font-size: 0.875rem;
+}
+
+/* Message sender labels */
+.chatbot-message > strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-message > strong {
+    color: #1976d2;
+}
+
+.bot-message > strong {
+    color: #424242;
+}
+
+.user-message {
+    background: #e3f2fd;
+    margin-left: 20px;
+    border-bottom-right-radius: 4px;
+}
+
+.bot-message {
+    background: #f5f5f5;
+    margin-right: 20px;
+    border-bottom-left-radius: 4px;
+}
+
+/* Markdown styles within chatbot messages */
+.chatbot-message span p {
+    margin: 0 0 8px 0;
+}
+
+.chatbot-message p:last-child {
+    margin-bottom: 0;
+}
+
+.chatbot-message h1,
+.chatbot-message h2,
+.chatbot-message h3,
+.chatbot-message h4,
+.chatbot-message h5,
+.chatbot-message h6 {
+    margin: 8px 0 6px 0;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.chatbot-message h1 { font-size: 1.1rem; }
+.chatbot-message h2 { font-size: 1.05rem; }
+.chatbot-message h3 { font-size: 1rem; }
+.chatbot-message h4 { font-size: 0.95rem; }
+.chatbot-message h5 { font-size: 0.9rem; }
+.chatbot-message h6 { font-size: 0.85rem; }
+
+.chatbot-message ul,
+.chatbot-message ol {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.chatbot-message li {
+    margin-bottom: 2px;
+}
+
+.chatbot-message code {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+}
+
+.chatbot-message pre {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 8px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 8px 0;
+}
+
+.chatbot-message pre code {
+    background: none;
+    padding: 0;
+}
+
+.chatbot-message blockquote {
+    border-left: 3px solid #007bff;
+    margin: 8px 0;
+    padding-left: 10px;
+    color: #666;
+    font-style: italic;
+}
+
+.chatbot-message em {
+    font-style: italic;
+}
+
+.chatbot-message strong {
+    font-weight: 600;
+}
+
+.chatbot-message hr {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 12px 0;
+}
+
+.chatbot-footer {
+    padding: 15px;
+    border-top: 1px solid #e0e0e0;
+    border-radius: 0 0 12px 12px;
+}
+
+.chatbot-widget.minimized {
+    height: auto;
+    width: 280px;
+    min-width: 260px;
+    min-height: auto;
+    resize: none;
+}
+
+.chatbot-widget.minimized .chatbot-header {
+    padding: 10px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.chatbot-widget.minimized .chatbot-header:hover {
+    background: linear-gradient(135deg, #0b5ed7, #3a4147);
+}
+
+.chatbot-widget.minimized .chatbot-title {
+    font-size: 0.9rem;
+}
+
+.chatbot-widget.minimized .chatbot-body,
+.chatbot-widget.minimized .chatbot-footer {
+    display: none;
+}
+
+/* Hide resize handle when minimized */
+.chatbot-widget.minimized::after {
+    display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .score-display {
+        font-size: 2rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .chatbot-widget {
+        width: calc(100vw - 20px);
+        right: 10px;
+        bottom: 10px;
+        height: 60vh;
+        min-width: 300px;
+        resize: none;
+    }
+    
+    .chatbot-widget.expanded {
+        width: calc(100vw - 20px);
+        height: 80vh;
+        top: 10px;
+        bottom: 10px;
+    }
+    
+    .chatbot-widget.fullscreen {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        width: auto;
+        height: auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .d-md-flex .btn {
+        width: auto;
+        margin-bottom: 0;
+    }
+}
+
+/* Print Styles - Professional PDF Layout */
+@media print {
+    /* Hide non-essential elements */
+    .navbar,
+    .btn:not(.print-keep),
+    footer,
+    .no-print {
+        display: none !important;
+    }
+    
+    /* Page setup */
+    @page {
+        margin: 0.75in 0.5in !important;
+        size: A4 !important;
+    }
+    
+    body {
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        color: #000 !important;
+        background: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Professional card styling */
+    .card {
+        border: 1px solid #333 !important;
+        box-shadow: none !important;
+        margin: 8px 0 !important;
+        page-break-inside: avoid !important;
+        background: white !important;
+    }
+    
+    .card-header {
+        background: #f8f9fa !important;
+        color: #000 !important;
+        padding: 8px 12px !important;
+        font-size: 14px !important;
+        font-weight: bold !important;
+        border-bottom: 2px solid #333 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .card-body {
+        padding: 12px !important;
+        font-size: 11px !important;
+    }
+    
+    /* Headers */
+    h1 { font-size: 18px !important; margin: 8px 0 !important; }
+    h2 { font-size: 16px !important; margin: 6px 0 !important; }
+    h3 { font-size: 14px !important; margin: 5px 0 !important; }
+    h4 { font-size: 13px !important; margin: 4px 0 !important; }
+    h5 { font-size: 12px !important; margin: 3px 0 !important; }
+    h6 { font-size: 11px !important; margin: 2px 0 !important; }
+    
+    /* Layout spacing */
+    .row {
+        margin: 3px 0 !important;
+    }
+    
+    .col-md-3, .col-md-4, .col-md-6, .col-md-8, .col-md-9, .col-md-12, .col-12 {
+        padding: 0 6px !important;
+    }
+    
+    /* Tables */
+    table {
+        font-size: 10px !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin: 5px 0 !important;
+    }
+    
+    th, td {
+        padding: 4px 6px !important;
+        border: 1px solid #333 !important;
+        font-size: 10px !important;
+        vertical-align: top !important;
+    }
+    
+    th {
+        background: #f0f0f0 !important;
+        font-weight: bold !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Badges and alerts */
+    .badge {
+        border: 1px solid #333 !important;
+        padding: 2px 6px !important;
+        font-size: 10px !important;
+        font-weight: bold !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .badge-success { background: #d4edda !important; color: #155724 !important; }
+    .badge-warning { background: #fff3cd !important; color: #856404 !important; }
+    .badge-danger { background: #f8d7da !important; color: #721c24 !important; }
+    .badge-info { background: #d1ecf1 !important; color: #0c5460 !important; }
+    
+    .alert {
+        padding: 8px 12px !important;
+        font-size: 11px !important;
+        margin: 5px 0 !important;
+        border: 1px solid #333 !important;
+        background: #f8f9fa !important;
+    }
+    
+    /* Risk assessment specific */
+    .risk-high { 
+        background: #f8d7da !important; 
+        border: 2px solid #dc3545 !important;
+        font-weight: bold !important;
+    }
+    .risk-moderate { 
+        background: #fff3cd !important; 
+        border: 2px solid #ffc107 !important;
+    }
+    .risk-low { 
+        background: #d4edda !important; 
+        border: 2px solid #28a745 !important;
+    }
+    
+    /* Compact spacing utilities */
+    .mt-1, .my-1 { margin-top: 2px !important; }
+    .mt-2, .my-2 { margin-top: 4px !important; }
+    .mt-3, .my-3 { margin-top: 6px !important; }
+    .mt-4, .my-4 { margin-top: 8px !important; }
+    
+    .mb-1, .my-1 { margin-bottom: 2px !important; }
+    .mb-2, .my-2 { margin-bottom: 4px !important; }
+    .mb-3, .my-3 { margin-bottom: 6px !important; }
+    .mb-4, .my-4 { margin-bottom: 8px !important; }
+    
+    .pt-1, .py-1 { padding-top: 2px !important; }
+    .pt-2, .py-2 { padding-top: 4px !important; }
+    .pt-3, .py-3 { padding-top: 6px !important; }
+    
+    .pb-1, .py-1 { padding-bottom: 2px !important; }
+    .pb-2, .py-2 { padding-bottom: 4px !important; }
+    .pb-3, .py-3 { padding-bottom: 6px !important; }
+    
+    /* Lists */
+    ul, ol {
+        margin: 3px 0 !important;
+        padding-left: 18px !important;
+    }
+    
+    li {
+        margin: 1px 0 !important;
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+    }
+    
+    p {
+        margin: 3px 0 !important;
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+    }
+    
+    /* Progress bars and charts */
+    .progress {
+        height: 12px !important;
+        margin: 3px 0 !important;
+        border: 1px solid #333 !important;
+        background: #f8f9fa !important;
+    }
+    
+    /* Icons - smaller but visible */
+    .fas, .fab, .far {
+        font-size: 10px !important;
+    }
+    
+    /* Force page breaks where needed */
+    .page-break-before {
+        page-break-before: always !important;
+    }
+    
+    .page-break-after {
+        page-break-after: always !important;
+    }
+    
+    .page-break-avoid {
+        page-break-inside: avoid !important;
+    }
+    
+    /* Ensure text is black */
+    * {
+        color: #000 !important;
+    }
+    
+    /* Print-specific text sizing */
+    .print-large { font-size: 14px !important; font-weight: bold !important; }
+    .print-medium { font-size: 12px !important; }
+    .print-small { font-size: 10px !important; }
+    .print-tiny { font-size: 9px !important; }
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Tooltip Enhancement */
+.tooltip {
+    font-size: 0.875rem;
+}
+
+.tooltip-inner {
+    background-color: #333;
+    color: white;
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0.75rem;
+}
+
+/* Form Validation */
+.invalid-feedback {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--danger-color);
+    margin-top: 0.25rem;
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-indicator.low { background-color: var(--success-color); }
+.status-indicator.moderate { background-color: var(--warning-color); }
+.status-indicator.high { background-color: var(--danger-color); }
+
+/* Enhanced Alerts */
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    font-weight: 500;
+}
+
+.alert i {
+    margin-right: 0.5rem;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Scrollbar for chatbot messages */
+.chatbot-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chatbot-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+.bg-primary, .btn-primary  {
+	background-color: #2b417c !important;
+}
+
+.text-enabiz {
+	color: #2b417c;
+}
+
+.bg-primary-old {
+	background-color: #0D6EFD;
+}

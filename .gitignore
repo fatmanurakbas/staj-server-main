@@ -1,0 +1,115 @@
+screenshot*
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+
+venv/
+env/
+ENV/
+.venv/
+.python-version
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+eggs/
+*.egg-info/
+.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pyright
+pyrightconfig.json
+
+# PyCharm / VSCode
+.idea/
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# dotenv
+.env
+*.env
+
+# Database / local files
+*.sqlite3
+*.db
+
+# Compiled C extensions
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# If using docker
+*.pid
+
+# If using celery
+celerybeat-schedule
+celerybeat.pid
+
+# If using coverage reports
+coverage/
+
+# Other
+*.swp
+*.tmp
+*~
+.temporary/
+temp/
+tmp/
+
+# Debug and test files
+debug_*.py
+test_*.py
+*_test.py
+
+# Development artifacts
+todo.md
+notes.md
+*.ipynb
+
+# Model artifacts (keep only final models)
+models-temp/
+models/temp/
+models/backup/
+
+# Voice input (if not using)
+voice_input/
+templates/voice_demo.html
+static/js/languages/tr-fixed.json
+static/js/server-i18n.js
+models/cirrhosis_model_new.py

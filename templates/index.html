@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-square-poll-vertical me-2"></i>
+                        {{ t('app.title') }}
+                    </h2>
+                    <p class="mb-0 mt-2">
+                        {{ t('app.subtitle') }}
+                    </p>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/calculate_risks" id="riskForm">
+                        <!-- Patient Demographics -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-enabiz border-bottom pb-2">
+                                    <i class="fas fa-user me-2"></i>{{ t('form.demographics') }}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Document Upload Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-dark">
+                                    <div class="card-header bg-dark text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-camera me-2"></i>{{ t('form.documentUpload') }}
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3">
+                                            {{ t('form.documentUploadDesc') }}
+                                        </p>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="documentUpload" 
+                                                   accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+                                            <button type="button" class="btn btn-outline-dark" id="uploadBtn">
+                                                <i class="fas fa-camera me-2"></i>{{ t('form.chooseDocument') }}
+                                            </button>
+                                            <button type="button" class="btn btn-dark ms-2" id="processBtn" 
+                                                    style="display: none;" disabled>
+                                                <i class="fas fa-magic me-2"></i>{{ t('form.processDocument') }}
+                                            </button>
+                                        </div>
+                                        <div id="uploadStatus" class="mt-2"></div>
+                                        <small class="form-text text-muted">
+                                            {{ t('form.supportedFormats') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden translation elements for JavaScript -->
+                        <div style="display: none;">
+                            <span id="js-fileSelected">{{ t('errors.fileSelected') }}</span>
+                            <span id="js-documentProcessedSuccess">{{ t('errors.documentProcessedSuccess') }}</span>
+                            <span id="js-errorProcessingDocument">{{ t('errors.errorProcessingDocument') }}</span>
+                            <span id="js-processingDocumentAI">{{ t('errors.processingDocumentAI') }}</span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="age" class="form-label">{{ t('form.age') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="age" name="age" 
+                                           min="18" max="100" required>
+                                    <span class="input-group-text">{{ t('form.units.years') }}</span>
+                                </div>
+                                <small class="form-text text-muted">{{ t('form.normalRange') }} 18-100 {{ t('form.units.years') }}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="gender" class="form-label">{{ t('form.gender') }}</label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="">{{ t('form.selectGender') }}</option>
+                                    <option value="1">{{ t('form.female') }}</option>
+                                    <option value="2">{{ t('form.male') }}</option>
+                                </select>
+                                <small class="form-text text-muted">{{ t('form.selectPatientGender') }}</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="bmi" class="form-label">{{ t('form.bmi') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="bmi" name="bmi" 
+                                           step="0.001" required>
+                                    <span class="input-group-text">{{ t('form.units.kgm2') }}</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 18.5-24.9, Overweight: 25-29.9, Obese: ≥30</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="obesity" class="form-label">{{ t('form.obesity') }}</label>
+                                <select class="form-select" id="obesity" name="obesity" required>
+                                    <option value="">{{ t('form.selectStatus') }}</option>
+                                    <option value="0">{{ t('form.no') }}</option>
+                                    <option value="1">{{ t('form.yes') }}</option>
+                                </select>
+                                <small class="form-text text-muted">BMI ≥30 = Obese, BMI &lt;30 = Not Obese</small>
+                            </div>
+                        </div>
+
+                        <!-- Laboratory Values -->
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12">
+                                <h5 class="text-enabiz border-bottom pb-2">
+                                    <i class="fas fa-flask me-2"></i>{{ t('form.labValues') }}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Voice Input Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-success">
+                                    <div class="card-body py-3">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <h6 class="mb-1 text-primary">
+                                                    <i class="fas fa-microphone me-2"></i>{{ t('voice.title') }}
+                                                </h6>
+                                                <small class="text-muted">
+                                                    {{ t('voice.subtitle') }}
+                                                </small>
+                                            </div>
+                                            <div class="col-md-4 text-end">
+                                                <button type="button" class="btn btn-success" id="voiceInputBtn" 
+                                                        onclick="startVoiceInput()">
+                                                    <i class="fas fa-microphone me-2"></i>{{ t('voice.startBtn') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="ast" class="form-label">{{ t('form.ast') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="ast" name="ast" 
+                                           step="0.001" required>
+                                    <span class="input-group-text">{{ t('form.units.ul') }}</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 10-40 U/L</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="alt" class="form-label">{{ t('form.alt') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="alt" name="alt" 
+                                           step="0.001" required>
+                                    <span class="input-group-text">{{ t('form.units.ul') }}</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 7-56 U/L</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="alp" class="form-label">{{ t('form.alp') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="alp" name="alp" 
+                                           step="0.001" required>
+                                    <span class="input-group-text">{{ t('form.units.ul') }}</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 44-147 U/L</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="trombosit" class="form-label">{{ t('form.platelets') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="trombosit" name="trombosit" 
+                                           step="0.01" required>
+                                    <span class="input-group-text">×10³/μL</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 150-400 ×10³/μL</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="albumin" class="form-label">{{ t('form.albumin') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="albumin" name="albumin" 
+                                           step="0.001" required>
+                                    <span class="input-group-text">{{ t('form.units.gdl') }}</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 3.5-5.0 g/dL</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="inr" class="form-label">{{ t('form.inr') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="inr" name="inr" 
+                                           step="0.001" required>
+                                    <span class="input-group-text">{{ t('form.units.ratio') }}</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 0.8-1.2</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="total_bilirubin" class="form-label">{{ t('form.totalBilirubin') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="total_bilirubin" name="total_bilirubin" 
+                                           step="0.001" required>
+                                    <span class="input-group-text">{{ t('form.units.mgdl') }}</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 0.3-1.2 mg/dL</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="direct_bilirubin" class="form-label">{{ t('form.directBilirubin') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="direct_bilirubin" name="direct_bilirubin" 
+                                           step="0.001" required>
+                                    <span class="input-group-text">{{ t('form.units.mgdl') }}</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 0.1-0.3 mg/dL</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="creatinine" class="form-label">{{ t('form.creatinine') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="creatinine" name="creatinine" 
+                                           step="0.001" required>
+                                    <span class="input-group-text">{{ t('form.units.mgdl') }}</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: 0.6-1.2 mg/dL</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="afp" class="form-label">{{ t('form.afp') }}
+                                    <span class="text-muted">{{ t('form.afpOptional') }}</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="afp" name="afp" 
+                                           step="0.001" placeholder="{{ t('form.optional') }}">
+                                    <span class="input-group-text">ng/mL</span>
+                                </div>
+                                <small class="form-text text-muted">Normal: &lt;10 ng/mL</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="ggt" class="form-label">{{ t('form.ggt') }}</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="ggt" name="ggt" step="1" min="0">
+                                    <span class="input-group-text">{{ t('form.units.ul') }}</span>
+                                </div>
+                                <small class="form-text text-muted">GGT ({{ t('form.normalRange') }} 9-48 {{ t('form.units.ul') }})</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="encephalopathy" class="form-label">{{ t('form.encephalopathy') }}</label>
+                                <select class="form-select" id="encephalopathy" name="encephalopathy">
+                                    <option value="0">{{ t('form.encephalopathy_none') }}</option>
+                                    <option value="1">{{ t('form.encephalopathy_mild') }}</option>
+                                    <option value="2">{{ t('form.encephalopathy_severe') }}</option>
+                                </select>
+                                <small class="form-text text-muted">{{ t('form.encephalopathy_desc') }}</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="ascites" class="form-label">{{ t('form.ascites') }}</label>
+                                <select class="form-select" id="ascites" name="ascites">
+                                    <option value="0">{{ t('form.ascites_none') }}</option>
+                                    <option value="1">{{ t('form.ascites_mild') }}</option>
+                                    <option value="2">{{ t('form.ascites_severe') }}</option>
+                                </select>
+                                <small class="form-text text-muted">{{ t('form.ascites_desc') }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn">
+                                    <i class="fas fa-calculator me-2"></i>
+                                    {{ t('form.calculate') }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Pre-rendered translations for JavaScript
+const TRANSLATIONS = {
+    calculate: '{{ t("form.calculate") }}',
+    calculating: '{{ t("form.calculating") }}'
+};
+
+function fillSampleData(riskLevel) {
+    const samples = {
+        'low': {
+            // Based on actual HCC dataset low-risk patient (Class=0)
+            age: 75,
+            gender: 1, // Female
+            bmi: 32.0, // Calculated to match obesity=1
+            obesity: 1, // Obese
+            ast: 122,
+            alt: 91,
+            alp: 396,
+            trombosit: 85, // Low platelets
+            albumin: 3.4,
+            inr: 1.58,
+            total_bilirubin: 3.5,
+            direct_bilirubin: 1.4,
+            creatinine: 0.9,
+            afp: 110.0 // Elevated AFP
+        },
+        'moderate': {
+            // Based on actual HCC dataset moderate-risk patient (Class=0)
+            age: 77,
+            gender: 1, // Female
+            bmi: 24.5, // Calculated to match obesity=0
+            obesity: 0, // Not obese
+            ast: 64,
+            alt: 16,
+            alp: 174,
+            trombosit: 279, // Normal platelets
+            albumin: 3.7,
+            inr: 0.95,
+            total_bilirubin: 0.4,
+            direct_bilirubin: 0.2,
+            creatinine: 1.11,
+            afp: 2440.0 // Very high AFP
+        },
+        'high': {
+            // Based on actual HCC dataset high-risk patient (Class=1)
+            age: 67,
+            gender: 1, // Female
+            bmi: 26.0, // Calculated to match obesity=0
+            obesity: 0, // Not obese
+            ast: 41,
+            alt: 34,
+            alp: 150,
+            trombosit: 99, // Low platelets
+            albumin: 3.4,
+            inr: 1.53,
+            total_bilirubin: 2.1,
+            direct_bilirubin: 0.5,
+            creatinine: 0.7,
+            afp: 95.0 // High AFP
+        }
+    };
+
+    const data = samples[riskLevel];
+    Object.keys(data).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+            element.value = data[key];
+        }
+    });
+}
+
+// Reset button state on page load (fixes back button issue)
+document.addEventListener('DOMContentLoaded', function() {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-calculator me-2"></i>' + TRANSLATIONS.calculate;
+    submitBtn.disabled = false;
+});
+
+// Form validation
+document.getElementById('riskForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + TRANSLATIONS.calculating;
+    submitBtn.disabled = true;
+});
+
+// Auto-fill obesity status based on BMI
+document.getElementById('bmi').addEventListener('input', function() {
+    const bmi = parseFloat(this.value);
+    const obesitySelect = document.getElementById('obesity');
+    
+    if (bmi >= 30) {
+        obesitySelect.value = '1';
+    } else if (bmi > 0) {
+        obesitySelect.value = '0';
+    }
+});
+
+// Handle page visibility change (when user navigates back)
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="fas fa-calculator me-2"></i>' + TRANSLATIONS.calculate;
+        submitBtn.disabled = false;
+    }
+});
+
+// Handle page show event (when page is restored from cache)
+window.addEventListener('pageshow', function(event) {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-calculator me-2"></i>' + TRANSLATIONS.calculate;
+    submitBtn.disabled = false;
+});
+</script>
+
+<!-- Voice Input Integration -->
+<script src="/static/js/voice-input.js"></script>
+{% endblock %}

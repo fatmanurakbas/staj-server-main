@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('navigation.register') }} - {{ t('app.title') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        {{ t('auth.createAccount') }}
+                    </h4>
+                    <p class="mb-0 mt-2">{{ t('auth.registerSubtitle') }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>{{ t('auth.medicalProfessionalsOnly') }}</strong><br>
+                        {{ t('auth.medicalProfessionalsWarning') }}
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                        <!-- Personal Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="fas fa-user me-2"></i>{{ t('auth.personalInformation') }}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">{{ t('auth.firstName') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" 
+                                           placeholder="{{ t('auth.firstNamePlaceholder') }}"
+                                           value="{{ form_data.first_name if form_data and form_data.first_name }}"
+                                           required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">{{ t('auth.lastName') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" 
+                                           placeholder="{{ t('auth.lastNamePlaceholder') }}"
+                                           value="{{ form_data.last_name if form_data and form_data.last_name }}"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="doctor_title" class="form-label">{{ t('auth.doctorTitle') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-graduation-cap"></i></span>
+                                    <select class="form-select" id="doctor_title" name="doctor_title" required>
+                                        <option value="" disabled {% if not (form_data and form_data.doctor_title) %}selected{% endif %}>
+                                            {{ t('auth.doctorTitles.selectTitle') }}
+                                        </option>
+                                        {% for title_key, title_display in doctor_titles %}
+                                            <option value="{{ title_key }}" 
+                                                    {% if form_data and form_data.doctor_title == title_key %}selected{% endif %}>
+                                                {{ title_display }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">{{ t('auth.email') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           placeholder="{{ t('auth.emailPlaceholder') }}"
+                                           value="{{ form_data.email if form_data and form_data.email }}"
+                                           required>
+                                </div>
+                                <small class="form-text text-muted">{{ t('auth.institutionalEmailNote') }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Professional Information -->
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="fas fa-square-poll-vertical me-2"></i>{{ t('auth.professionalInformation') }}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="medical_field" class="form-label">{{ t('auth.medicalField') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-heartbeat"></i></span>
+                                    <select class="form-select" id="medical_field" name="medical_field" required>
+                                        <option value="" disabled {% if not (form_data and form_data.medical_field) %}selected{% endif %}>
+                                            {{ t('auth.medicalFields.selectSpecialty') }}
+                                        </option>
+                                        {% for field_key, field_display in medical_fields %}
+                                            <option value="{{ field_key }}" 
+                                                {{ 'selected' if form_data and form_data.medical_field == field_key else '' }}>
+                                                {{ field_display }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="organization" class="form-label">{{ t('auth.organization') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-hospital"></i></span>
+                                    <input type="text" class="form-control" id="organization" name="organization" 
+                                           value="{{ form_data.organization if form_data and form_data.organization }}"
+                                           placeholder="{{ t('auth.organizationPlaceholder') }}" required>
+                                </div>
+                                <small class="form-text text-muted">{{ t('auth.currentWorkplace') }}</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="diploma_number" class="form-label">{{ t('auth.medicalLicense') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-certificate"></i></span>
+                                    <input type="text" class="form-control" id="diploma_number" name="diploma_number" 
+                                           value="{{ form_data.diploma_number if form_data and form_data.diploma_number }}"
+                                           placeholder="{{ t('auth.licenseNumberPlaceholder') }}" required>
+                                </div>
+                                <small class="form-text text-muted">{{ t('auth.verificationPurpose') }}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="years_experience" class="form-label">{{ t('auth.yearsExperience') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    <input type="number" class="form-control" id="years_experience" name="years_experience" 
+                                           placeholder="{{ t('auth.yearsPlaceholder') }}"
+                                           value="{{ form_data.years_experience if form_data and form_data.years_experience else '0' }}"
+                                           min="0" max="50">
+                                </div>
+                                <small class="form-text text-muted">{{ t('auth.yearsInPractice') }}</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">{{ t('auth.phone') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    <input type="tel" class="form-control" id="phone" name="phone" 
+                                           placeholder="{{ t('auth.phonePlaceholder') }}"
+                                           value="{{ form_data.phone if form_data and form_data.phone }}">
+                                </div>
+                                <small class="form-text text-muted">{{ t('auth.contactNumberOptional') }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Security -->
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="fas fa-shield-alt me-2"></i>{{ t('auth.accountSecurity') }}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="password" class="form-label">{{ t('auth.password') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           placeholder="{{ t('auth.passwordPlaceholder') }}" required>
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                                        <i class="fas fa-eye" id="toggleIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="password-requirements mt-2">
+                                    <small class="text-muted">{{ t('auth.passwordRequirements') }}</small>
+                                    <ul class="small text-muted">
+                                        <li>{{ t('auth.passwordLength') }}</li>
+                                        <li>{{ t('auth.passwordUppercase') }}</li>
+                                        <li>{{ t('auth.passwordLowercase') }}</li>
+                                        <li>{{ t('auth.passwordNumber') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="confirm_password" class="form-label">{{ t('auth.confirmPassword') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                                           placeholder="{{ t('auth.confirmPlaceholder') }}" required>
+                                </div>
+                                <div id="password-match" class="mt-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="fas fa-gavel me-2"></i>{{ t('auth.legalDocuments') }}
+                                </h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="terms_accepted" name="terms_accepted" required>
+                                    <label class="form-check-label" for="terms_accepted">
+                                        {{ t('auth.agreeToTerms') }}
+                                        <a href="#" onclick="openLegalDocument('terms')" class="text-decoration-none">
+                                            <strong>{{ t('auth.termsOfService') }}</strong>
+                                        </a>
+                                        {{ t('auth.and') }}
+                                        <a href="#" onclick="openLegalDocument('privacy')" class="text-decoration-none">
+                                            <strong>{{ t('auth.privacyPolicy') }}</strong>
+                                        </a>
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted">
+                                    {{ t('auth.legalDocumentNote') }}
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-user-plus me-2"></i>{{ t('auth.registerButton') }}
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr>
+                    <div class="text-center">
+                        <p class="mb-0">{{ t('auth.haveAccount') }}</p>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>{{ t('auth.signInHere') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle password visibility
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+});
+
+// Password confirmation validation
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    const matchDiv = document.getElementById('password-match');
+    
+    if (confirmPassword === '') {
+        matchDiv.innerHTML = '';
+        return;
+    }
+    
+    if (password === confirmPassword) {
+        matchDiv.innerHTML = '<small class="text-success"><i class="fas fa-check"></i> {{ t("auth.passwordsMatch") }}</small>';
+    } else {
+        matchDiv.innerHTML = '<small class="text-danger"><i class="fas fa-times"></i> {{ t("auth.passwordsNoMatch") }}</small>';
+    }
+});
+
+// Email domain validation
+document.getElementById('email').addEventListener('blur', function() {
+    const email = this.value;
+    
+    if (email) {
+        const domain = email.split('@')[1];
+        if (domain) {
+            const domainLower = domain.toLowerCase();
+            // Allow any .edu domain, any .gov domain, or specific approved domains
+            if (domainLower.includes('.edu.') || domainLower.endsWith('.edu') || 
+                domainLower.includes('.gov.') || domainLower.endsWith('.gov')) {
+                this.setCustomValidity('');
+            } else {
+                this.setCustomValidity('{{ t("auth.institutionalEmailRequired") }}');
+            }
+        } else {
+            this.setCustomValidity('{{ t("auth.institutionalEmailRequired") }}');
+        }
+    }
+});
+
+// Form submission validation
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    if (password !== confirmPassword) {
+        e.preventDefault();
+        alert('{{ t("auth.passwordsNoMatch") }}');
+        return false;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ t("auth.creatingAccount") }}';
+    submitBtn.disabled = true;
+});
+</script>
+{% endblock %}

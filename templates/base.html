@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="{{ get_current_language() }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ t('app.title') }}{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22600%22%20height%3D%22600%22%20viewBox%3D%220%200%20600%20600%22%20fill%3D%22none%22%3E%20<path%20d%3D%22M533.333%200H66.6667C30%200%201.52588e-05%2030%201.52588e-05%2066.6667V533.333C1.52588e-05%20570%2030%20600%2066.6667%20600H533.333C570%20600%20600%20570%20600%20533.333V66.6667C600%2030%20570%200%20533.333%200ZM200%20466.667H133.333V233.333H200V466.667ZM333.333%20466.667H266.667V133.333H333.333V466.667ZM466.667%20466.667H400V333.333H466.667V466.667Z%22%20fill%3D%22white%22%2F%3E%3C%2Fsvg%3E">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    
+    <!-- Language and speech recognition setup -->
+    <script>
+        window.CURRENT_LANGUAGE = "{{ get_current_language() }}";
+        window.SPEECH_LANGUAGE = "{{ 'tr-TR' if get_current_language() == 'tr' else 'en-US' }}";
+    </script>
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-square-poll-vertical me-2"></i>
+                {{ t('app.title') }}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-calculator me-1"></i>{{ t('navigation.home') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="toggleChatbot(); return false;">
+                            <i class="fas fa-robot me-1"></i>{{ t('navigation.chatbot') }}
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-md me-1"></i>{{ current_user.get_display_name() }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><h6 class="dropdown-header">{{ current_user.email }}</h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-1"></i>{{ t('navigation.logout') }}
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="fas fa-sign-in-alt me-1"></i>{{ t('navigation.login') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus me-1"></i>{{ t('navigation.register') }}
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Language Selector -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-globe me-1"></i>{{ '🇹🇷' if get_current_language() == 'tr' else '🇺🇸' }} {{ get_current_language()|upper }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                            <li>
+                                <a class="dropdown-item {% if get_current_language() == 'tr' %}active{% endif %}" 
+                                   href="{{ url_for('set_language', language='tr') }}">
+                                    🇹🇷 Türkçe
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {% if get_current_language() == 'en' %}active{% endif %}" 
+                                   href="{{ url_for('set_language', language='en') }}">
+                                    🇺🇸 English
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">{{ t('footer.copyright') }}</p>
+                    <small class="text-muted">{{ t('footer.purpose') }}</small>
+                </div>
+                <div class="col-md-6 text-end">
+                    <small class="text-muted">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        {{ t('footer.disclaimer') }}
+                    </small>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <small class="text-muted">
+                        <a href="#" onclick="openLegalDocument('terms')" class="text-decoration-none me-3">
+                            <i class="fas fa-gavel me-1"></i>{{ t('auth.termsOfService') }}
+                        </a>
+                        <a href="#" onclick="openLegalDocument('privacy')" class="text-decoration-none">
+                            <i class="fas fa-shield-alt me-1"></i>{{ t('auth.privacyPolicy') }}
+                        </a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot Widget -->
+    <div id="chatbot-widget" class="chatbot-widget" style="display: none;">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <i class="fas fa-robot me-2"></i>
+                <span>{{ t('chatbot.title') }}</span>
+            </div>
+            <div class="chatbot-controls">
+                <button class="btn btn-sm btn-outline-light me-1" onclick="expandChatbot()" title="{{ t('chatbot.expand') }}" id="expand-btn">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-light me-1" onclick="minimizeChatbot()" title="{{ t('chatbot.minimize') }}" id="minimize-btn">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-light" onclick="closeChatbot()" title="{{ t('chatbot.close') }}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="chatbot-body">
+            <div class="chatbot-role-selector mb-3">
+                <label for="chatbot-role">{{ t('chatbot.role') }}</label>
+                <select id="chatbot-role" class="form-select form-select-sm">
+                    <option value="Uzman Doktor">{{ t('chatbot.roles.Uzman Doktor') }}</option>
+                    <option value="Asistan">{{ t('chatbot.roles.Asistan') }}</option>
+                    <option value="Öğrenci" selected>{{ t('chatbot.roles.Öğrenci') }}</option>
+                </select>
+            </div>
+            
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="chatbot-message bot-message">
+                    <strong>{{ t('chatbot.assistant') }}:</strong>
+                    <span>{{ t('chatbot.subtitle') }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chatbot-footer">
+            <div class="input-group">
+                <input type="text" id="chatbot-input" class="form-control" 
+                       placeholder="{{ t('chatbot.placeholder') }}"
+                       onkeydown="handleChatbotKeyDown(event)">
+                <button class="btn btn-primary" onclick="sendChatbotMessage()" id="chatbot-send-btn">
+                    <span>{{ t('chatbot.send') }}</span>
+                </button>
+            </div>
+            <div id="chatbot-loading" class="text-center mt-2" style="display: none;">
+                <small class="text-muted">
+                    <i class="fas fa-spinner fa-spin me-1"></i>
+                    <span>{{ t('chatbot.waitingResponse') }}</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden chatbot translation elements for JavaScript -->
+    <div style="display: none;">
+        <span id="js-chatbot-you">{{ t('chatbot.you') }}</span>
+        <span id="js-chatbot-assistant">{{ t('chatbot.assistant') }}</span>
+        <span id="js-chatbot-errorMessage">{{ t('chatbot.errorMessage') }}</span>
+        <span id="js-chatbot-networkError">{{ t('chatbot.networkError') }}</span>
+        <span id="js-chatbot-minimize">{{ t('chatbot.tooltips.minimize') }}</span>
+        <span id="js-chatbot-restore">{{ t('chatbot.tooltips.restore') }}</span>
+        <span id="js-chatbot-expand">{{ t('chatbot.tooltips.expand') }}</span>
+        <span id="js-chatbot-fullscreen">{{ t('chatbot.tooltips.fullscreen') }}</span>
+        <span id="js-chatbot-normalSize">{{ t('chatbot.tooltips.normalSize') }}</span>
+        <span id="voice-stop-btn-text" style="display:none">{{ t('voice.stopBtn') }}</span>
+        <span id="voice-start-btn-text" style="display:none">{{ t('voice.startBtn') }}</span>
+        <span id="voice-active-text" style="display:none">{{ t('voice.active') }}</span>
+        <span id="voice-listening-text" style="display:none">{{ t('voice.listening') }}</span>
+        <span id="voice-stopped-text" style="display:none">{{ t('voice.stopped') }}</span>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+	<script src="https://unpkg.com/blob-stream@0.1.3/blob-stream.js"></script>
+    
+    <!-- Voice Input System -->
+    <script src="/static/js/voice-input.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/static/js/main.js"></script>
+    
+    <script>
+    // Global function to open legal documents
+    function openLegalDocument(docType) {
+        const currentLang = document.documentElement.lang || 'en';
+        const langSuffix = currentLang === 'tr' ? 'tr' : 'en';
+        
+        let url;
+        if (docType === 'terms') {
+            url = `/static/legal/terms-${langSuffix}.html`;
+        } else if (docType === 'privacy') {
+            url = `/static/legal/privacy-${langSuffix}.html`;
+        }
+        
+        if (url) {
+            window.open(url, '_blank');
+        }
+    }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
