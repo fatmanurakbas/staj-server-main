@@ -1422,7 +1422,7 @@ def generate_pdf():
     # Title
     p.setFont(font_bold, 20)
     p.setFillColorRGB(1, 1, 1)  # White text
-    title = _("results.report_title", 'LiverAId')
+    title = _("results.report_title", 'HepDecide')
     p.drawCentredString(width/2, y - 25, title)
     
     # Subtitle
@@ -1812,14 +1812,14 @@ def generate_pdf():
     # Copyright
     p.setFont(font_family, 8)
     p.setFillColorRGB(0.6, 0.6, 0.6)
-    p.drawString(margin, 30, '© 2025 LiverAId Risk Prediction System')
+    p.drawString(margin, 30, '© 2025 HepDecide Risk Prediction System')
     p.drawRightString(width - margin, 30, f"Sayfa 1")
 
     p.save()
     buffer.seek(0)
     
-    response = make_response(send_file(buffer, as_attachment=True, download_name='LiverAId_Risk_Assessment.pdf', mimetype='application/pdf'))
-    response.headers['Content-Disposition'] = 'attachment; filename=LiverAId_Risk_Assessment.pdf'
+    response = make_response(send_file(buffer, as_attachment=True, download_name='HepDecide_Risk_Assessment.pdf', mimetype='application/pdf'))
+    response.headers['Content-Disposition'] = 'attachment; filename=HepDecide_Risk_Assessment.pdf'
     return response
 
 # --- PDF export language keys are now managed in static/js/languages/tr.json and en.json ---

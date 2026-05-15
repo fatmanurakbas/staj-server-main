@@ -89,6 +89,7 @@ class NAFLDRiskModel:
             
             # --- A. Karşı Olgusal (Counterfactual) Öneriler Hesaplama ---
             targets = {'Body Mass Index': 30, 'ALT': 56.0, 'AST': 40.0, 'Total Bilirubin': 1.2, 'ALP': 147}
+  
             for feat, target in targets.items():
                 curr = mapped_data.get(feat, 0)
                 if curr > target:

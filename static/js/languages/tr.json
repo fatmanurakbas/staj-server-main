@@ -3,7 +3,7 @@
 	"drgpt": "Dr. Necati",
 	"drgemini": "Dr. Kaan",
 	"app": {
-		"title": "LiverAId - Karaciğer Hastalık Risk Değerlendirmesi",
+		"title": "HepDecide - Karaciğer Hastalık Risk Değerlendirmesi",
 		"subtitle": "AI ile Desteklenmiş Tıbbi Karar Destek Sistemi"
 	},
 	"navigation": {
@@ -235,7 +235,7 @@
 		"recommendations": "Öneriler",
 		"backToCalculator": "Hesap Makinesine Dön",
 		"printResults": "Sonuçları Yazdır",
-		"report_title": "LiverAId",
+		"report_title": "HepDecide",
 		"report_subtitle": "Siroz, HCC ve MAFLD için Kapsamlı Analiz",
 		"generated_at": "Oluşturulma Tarihi:",
 		"age": "Yaş",
@@ -454,7 +454,7 @@
 		"nafld": "MAFLD (Metabolik İlişkili Yağlı Karaciğer Hastalığı)"
 	},
 	"chatbot": {
-		"title": "LiverAId AI Asistan",
+		"title": "HepDecide AI Asistan",
 		"subtitle": "Tıbbi destek ve rehberlik için AI asistanınız",
 		"role": "Rolünüz",
 		"roles": {
@@ -465,7 +465,7 @@
 		"placeholder": "Sorunuzu yazın...",
 		"send": "Gönder",
 		"you": "Siz",
-		"assistant": "LiverAId",
+		"assistant": "HepDecide",
 		"waitingResponse": "Yanıt bekleniyor...",
 		"close": "Kapat",
 		"minimize": "Küçült",
@@ -481,7 +481,7 @@
 		}
 	},
 	"footer": {
-		"copyright": "© 2025 LiverAId Risk Tahmin Sistemi",
+		"copyright": "© 2025 HepDecide Risk Tahmin Sistemi",
 		"purpose": "Klinik araştırma ve eğitim amaçlıdır",
 		"disclaimer": "Bu araç yalnızca eğitim amaçlıdır. Daima sağlık uzmanlarına danışın."
 	}

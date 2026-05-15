@@ -100,7 +100,12 @@ class HCCRiskModelFinal:
             xai_results = {'shap_plot': None, 'impact_plot': None, 'actionable_insights': []}
             hcc_targets = {'AFP': 10.0, 'Age': 50.0, 'Total_Bil': 1.1, 'AST': 40.0, 'Creatinine': 1.0, 'INR': 1.1}
 
+            # --- EYLEM PLANI DÖNGÜSÜ (GÜNCELLENDİ) ---
             for col, target in hcc_targets.items():
+                # YAŞ ve CİNSİYETİ plana ekleme (Değiştirilemez oldukları için filtreliyoruz)
+                if col.lower() in ['age', 'gender', 'yaş', 'cinsiyet']:
+                    continue # Bu satır, yaşı ve cinsiyeti eylem planına dahil etmeden bir sonrakine geçer.
+                
                 curr = float(features.get(col, 0))
                 if curr > target:
                     df_counter = df.copy(); df_counter[col] = target
@@ -109,12 +114,19 @@ class HCCRiskModelFinal:
                     new_p = 1 - float(self.model.predict_proba(X_c)[0][1])
                     imp = round((risk_probability - new_p) * 100, 1)
                     if imp > 1.0:
-                        xai_results['actionable_insights'].append({'feature': col.replace('_', ' ').upper(), 'current': round(curr, 1), 'target': target, 'impact': imp})
+                        xai_results['actionable_insights'].append({
+                            'feature': col.replace('_', ' ').upper(), 
+                            'current': round(curr, 1), 
+                            'target': target, 
+                            'impact': imp
+                        })
+            # ----------------------------------------
             
             xai_results['actionable_insights'].sort(key=lambda x: x['impact'], reverse=True)
 
             # Çizimler
             try:
+                # 1. GRAFİK: Karar Ağırlığı (Burada Yaş Görünmeli, çünkü kararı etkileyen bir faktör)
                 plt.figure(figsize=(10, 6))
                 weights = [0.4 if f=='AFP' else 0.2 if f=='Age' else 0.1 for f in self.all_feature_names]
                 plt.barh([f.upper() for f in self.all_feature_names], weights, color='crimson')
@@ -123,11 +135,15 @@ class HCCRiskModelFinal:
                 buf1 = io.BytesIO(); plt.savefig(buf1, format='png'); plt.close()
                 xai_results['shap_plot'] = base64.b64encode(buf1.getvalue()).decode('utf-8')
 
+                # 2. GRAFİK: İyileştirme Potansiyeli (Burada Yaş Görünmeyecek, sadece hedefler görünecek)
                 plt.figure(figsize=(10, 6))
                 p_data = xai_results['actionable_insights'][:6]
                 if p_data:
                     plt.barh([i['feature'] for i in p_data], [i['impact'] for i in p_data], color='darkred')
                     plt.title("2. İyileştirme Potansiyeli (%)")
+                else:
+                    plt.text(0.5, 0.5, 'Klinik Hedefler Normal', ha='center', va='center')
+                
                 buf2 = io.BytesIO(); plt.savefig(buf2, format='png'); plt.close()
                 xai_results['impact_plot'] = base64.b64encode(buf2.getvalue()).decode('utf-8')
             except Exception as e: print(f"Plot error: {e}")
@@ -149,7 +165,6 @@ class HCCRiskModelFinal:
         except Exception as e:
             print(f"❌ HCC Error: {e}")
             return {'disease': 'HCC', 'error': str(e), 'xai': None}
-
     def _generate_interpretation(self, features, traditional_scores, risk_probability):
         # ... (Senin mevcut yorum fonksiyonun olduğu gibi kalsın) ...
         return "HCC risk analizi tamamlandı."

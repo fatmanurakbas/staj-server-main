@@ -3,7 +3,7 @@
 	"drgpt": "Dr. Johnson",
 	"drgemini": "Dr. Brown",
 	"app": {
-		"title": "LiverAId - Liver Disease Risk Assessment",
+		"title": "HepDecide - Liver Disease Risk Assessment",
 		"subtitle": "AI-Powered Medical Decision Support System"
 	},
 	"navigation": {
@@ -17,7 +17,7 @@
 		"chatbot": "AI Assistant"
 	},
 	"chatbot": {
-		"title": "LiverAId AI Assistant",
+		"title": "HepDecide AI Assistant",
 		"subtitle": "Your AI assistant for medical support and guidance",
 		"role": "Your Role:",
 		"roles": {
@@ -28,7 +28,7 @@
 		"placeholder": "Type your question...",
 		"send": "Send",
 		"you": "You",
-		"assistant": "LiverAId",
+		"assistant": "HepDecide",
 		"waitingResponse": "Waiting for response...",
 		"close": "Close",
 		"minimize": "Minimize",
@@ -44,7 +44,7 @@
 		}
 	},
 	"footer": {
-		"copyright": "© 2025 LiverAId Risk Prediction System",
+		"copyright": "© 2025 HepDecide Risk Prediction System",
 		"purpose": "For clinical research and educational purposes",
 		"disclaimer": "This tool is for educational purposes only. Always consult healthcare professionals."
 	},
@@ -322,7 +322,7 @@
 		"bmiCategory": "BMI Category",
 		"bmiDesc": "Body Mass Index classification.",
 		"normalWeight": "Normal weight",
-		"report_title": "LiverAId",
+		"report_title": "HepDecide",
 		"report_subtitle": "Comprehensive Analysis for Cirrhosis, HCC, and MAFLD",
 		"generated_at": "Generated At:",
 		"age": "Age",

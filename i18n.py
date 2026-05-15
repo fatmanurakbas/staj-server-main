@@ -1,5 +1,5 @@
 """
-Server-side internationalization module for LiverAId
+Server-side internationalization module for HepDecide
 Handles translations for Turkish and English languages
 """
 

@@ -1,11 +1,11 @@
 /**
- * Internationalization (i18n) System for LiverAId
+ * Internationalization (i18n) System for HepDecide
  * Supports Turkish and English languages
  */
 
 class I18nManager {
     constructor() {
-        this.currentLanguage = localStorage.getItem('liveraid-language') || 'tr';
+        this.currentLanguage = localStorage.getItem('HepDecide-language') || 'tr';
         this.translations = {};
         this.loadedLanguages = new Set();
     }
@@ -81,7 +81,7 @@ class I18nManager {
         await this.loadLanguage(lang);
         
         this.currentLanguage = lang;
-        localStorage.setItem('liveraid-language', lang);
+        localStorage.setItem('HepDecide-language', lang);
         
         // Update the page
         this.updatePageLanguage();

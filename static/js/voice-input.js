@@ -1,5 +1,5 @@
 /**
- * Voice Input Integration for LiverAId
+ * Voice Input Integration for HepDecide
  * Turkish Speech Recognition for Medical Lab Values
  */
 

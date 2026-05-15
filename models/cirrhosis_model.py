@@ -162,10 +162,14 @@ class CirrhosisRiskModel:
             # --- A. Karşı Olgusal (Counterfactual) Öneriler Hesaplama ---
             targets = {'alt': 56.0, 'ast': 40.0, 'bmi': 30.0, 'trombosit': 250.0, 
                        'total_bilirubin': 1.2, 'creatin': 1.2, 'inr': 1.2}
-
+            for feature in self.feature_names:
+                # KRİTİK FİLTRE: Değiştirilemez parametreleri eylem planına dahil etme
+                if feature.lower() in ['age', 'gender', 'yaş', 'cinsiyet']:
+                    continue
             for feature in self.feature_names:
                 f_key = feature.lower().replace('body mass index', 'bmi').replace('trombosit', 'platelet').replace('creatinine', 'creatin')
                 if f_key in targets:
+
                     curr = float(mapped_data[feature])
                     if curr > targets[f_key]:
                         # Simülasyon: Değer düşerse risk ne kadar azalır?
