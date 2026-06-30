@@ -1,0 +1,694 @@
+{% extends "base.html" %}
+
+{% block title %}Klinik Risk Değerlendirme Raporu{% endblock %}
+
+{% block content %}
+<!-- Özel Klinik UI Stilleri -->
+<style>
+    :root {
+        --clinical-primary: #1A365D; /* Derin Lacivert */
+        --clinical-secondary: #2B6CB0;
+        --clinical-bg: #F7FAFC;
+        --clinical-border: #E2E8F0;
+        --clinical-text: #2D3748;
+        --clinical-muted: #718096;
+    }
+    
+    body {
+        background-color: var(--clinical-bg);
+        color: var(--clinical-text);
+    }
+
+    /* Kart Stilleri */
+    .clinical-card {
+        background: #ffffff;
+        border: 1px solid var(--clinical-border);
+        border-radius: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: all 0.2s ease-in-out;
+        overflow: hidden;
+    }
+    
+    .clinical-card-header {
+        background: #ffffff;
+        border-bottom: 1px solid var(--clinical-border);
+        padding: 1rem 1.25rem;
+    }
+
+    .clinical-header-title {
+        color: var(--clinical-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: -0.01em;
+    }
+
+    /* Lab Değerleri Kutuları */
+    .lab-box {
+        border: 1px solid var(--clinical-border);
+        border-radius: 8px;
+        background-color: #FAFCFF;
+        transition: transform 0.15s ease;
+    }
+    .lab-box:hover {
+        border-color: var(--clinical-secondary);
+        background-color: #ffffff;
+        transform: translateY(-2px);
+    }
+    .lab-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--clinical-muted);
+        font-weight: 600;
+    }
+    .lab-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--clinical-primary);
+    }
+    .lab-unit {
+        font-size: 0.8rem;
+        color: var(--clinical-muted);
+        font-weight: normal;
+    }
+
+    /* Risk Kartları Üst Çizgileri */
+    .risk-card {
+        border-top: 4px solid;
+    }
+    .risk-card-secondary { border-top-color: #A0AEC0; }
+    .risk-card-success { border-top-color: #48BB78; }
+    .risk-card-warning { border-top-color: #ED8936; }
+    .risk-card-danger { border-top-color: #F56565; }
+
+    /* İlerleme Çubukları */
+    .clinical-progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #EDF2F7;
+    }
+    
+    /* XAI Bölümü */
+    .xai-insight-item {
+        border-left: 3px solid transparent;
+        transition: all 0.2s;
+    }
+    .xai-insight-item:hover {
+        background-color: #F7FAFC;
+        border-left-color: var(--clinical-secondary);
+    }
+
+    /* Chat Arayüzü */
+    .chat-container {
+        background-color: #F8FAFC;
+        border: 1px solid var(--clinical-border);
+    }
+    .chat-bubble-ai {
+        background-color: #ffffff;
+        border: 1px solid #E2E8F0;
+        border-left: 3px solid var(--clinical-secondary);
+        color: var(--clinical-text);
+    }
+    .chat-bubble-user {
+        background-color: var(--clinical-primary);
+        color: #ffffff;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <!-- Sayfa Başlığı & Hasta Özeti (Tek Satırda Kompakt Tasarım) -->
+    <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
+        <div>
+            <h2 class="mb-1 text-dark fw-bold">
+                <i class="fas fa-file-medical-alt text-primary me-2"></i>{{ t('results.title') }}
+            </h2>
+            <p class="text-muted mb-0"><i class="fas fa-calendar-alt me-1"></i> {{ t('results.subtitle') }}</p>
+        </div>
+        <div class="text-end">
+            <button class="btn btn-outline-primary shadow-sm" onclick="requestServerPDF()">
+                <i class="fas fa-download me-2"></i>Raporu İndir
+            </button>
+            <a href="/" class="btn btn-primary shadow-sm ms-2">
+                <i class="fas fa-plus me-2"></i>Yeni Analiz
+            </a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger border-0 shadow-sm rounded-3" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i><strong>Sistem Uyarısı:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    {% if results %}
+    <!-- Demografik Bilgiler Barı -->
+    <div class="clinical-card mb-4 bg-light">
+        <div class="card-body py-3">
+            <div class="row align-items-center text-center text-md-start">
+                <div class="col-md-4 border-end-md mb-2 mb-md-0">
+                    <span class="lab-label d-block">{{ t('form.age') }}</span>
+                    <span class="fs-5 fw-bold text-dark">{{ "%.0f"|format(patient_data.get('age', 0)) }} <span class="lab-unit">{{ t('form.units.years') }}</span></span>
+                </div>
+                <div class="col-md-4 border-end-md mb-2 mb-md-0">
+                    <span class="lab-label d-block">{{ t('form.gender') }}</span>
+                    <span class="fs-5 fw-bold text-dark">
+                        <i class="fas {{ 'fa-venus text-pink' if patient_data.get('gender', 0) == 1 else 'fa-mars text-primary' }} me-1"></i>
+                        {{ t('form.female') if patient_data.get('gender', 0) == 1 else t('form.male') }}
+                    </span>
+                </div>
+                <div class="col-md-4">
+                    <span class="lab-label d-block">{{ t('form.bmi') }}</span>
+                    <span class="fs-5 fw-bold text-dark">{{ "%.1f"|format(patient_data.get('bmi', 0)) }} <span class="lab-unit">kg/m²</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Laboratuvar ve Klinik Bulgular -->
+    <div class="clinical-card mb-5">
+        <div class="clinical-card-header">
+            <h5 class="clinical-header-title mb-0">
+                <i class="fas fa-vials me-2"></i>Laboratuvar Parametreleri ve Klinik Bulgular
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <!-- Lab Değerleri Döngüsü için Makro benzeri yapı -->
+                {% set labs = [
+                    {'label': t('form.ast'), 'val': patient_data.get('ast', 0), 'unit': t('form.units.ul'), 'fmt': '%.0f'},
+                    {'label': t('form.alt'), 'val': patient_data.get('alt', 0), 'unit': t('form.units.ul'), 'fmt': '%.0f'},
+                    {'label': t('form.platelets'), 'val': patient_data.get('trombosit', 0), 'unit': t('form.units.x10_3_ul'), 'fmt': '%.0f'},
+                    {'label': t('form.albumin'), 'val': patient_data.get('albumin', 0), 'unit': t('form.units.gdl'), 'fmt': '%.1f'},
+                    {'label': 'Total Bilirubin', 'val': patient_data.get('total_bilirubin', 0), 'unit': 'mg/dL', 'fmt': '%.1f'},
+                    {'label': 'Direct Bilirubin', 'val': patient_data.get('direct_bilirubin', 0), 'unit': 'mg/dL', 'fmt': '%.1f'},
+                    {'label': 'INR', 'val': patient_data.get('inr', 0), 'unit': '', 'fmt': '%.2f'},
+                    {'label': 'Creatinine', 'val': patient_data.get('creatinine', 0), 'unit': 'mg/dL', 'fmt': '%.1f'},
+                    {'label': 'ALP', 'val': patient_data.get('alp', 0), 'unit': 'U/L', 'fmt': '%.0f'},
+                    {'label': t('form.ggt'), 'val': patient_data.get('ggt', 0), 'unit': t('form.units.ul'), 'fmt': '%.0f'}
+                ] %}
+                
+                {% for lab in labs %}
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="lab-box p-3 h-100 text-center">
+                        <div class="lab-label mb-1">{{ lab.label }}</div>
+                        <div class="lab-value">{{ lab.fmt|format(lab.val) }} <span class="lab-unit">{{ lab.unit }}</span></div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {% if has_afp %}
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="lab-box p-3 h-100 text-center border-primary">
+                        <div class="lab-label mb-1 text-primary">AFP</div>
+                        <div class="lab-value">{{ "%.1f"|format(patient_data.get('afp', 0)) }} <span class="lab-unit">ng/mL</span></div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Ensefalopati ve Asit -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="d-flex gap-2 h-100">
+                        <div class="lab-box p-3 flex-fill text-center bg-light">
+                            <div class="lab-label mb-1">{{ t('form.encephalopathy') }}</div>
+                            <div class="fw-bold text-dark small mt-2">
+                                {% set enceph_val = patient_data.get('encephalopathy', 0) %}
+                                {% if enceph_val in [1, 1.0, "1.0"] %}{{ t('form.encephalopathy_1') }}
+                                {% elif enceph_val in [2, 2.0, "2.0"] %}{{ t('form.encephalopathy_2') }}
+                                {% else %}{{ t('form.encephalopathy_0') }}{% endif %}
+                            </div>
+                        </div>
+                        <div class="lab-box p-3 flex-fill text-center bg-light">
+                            <div class="lab-label mb-1">{{ t('form.ascites') }}</div>
+                            <div class="fw-bold text-dark small mt-2">
+                                {% set ascites_val = patient_data.get('ascites', 0) %}
+                                {% if ascites_val in [1, 1.0, "1.0"] %}{{ t('form.ascites_1') }}
+                                {% elif ascites_val in [2, 2.0, "2.0"] %}{{ t('form.ascites_2') }}
+                                {% else %}{{ t('form.ascites_0') }}{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yapay Zeka Prediktif Analiz Sonuçları -->
+    <h4 class="mb-3 text-dark fw-bold"><i class="fas fa-project-diagram text-primary me-2"></i>Prediktif Risk Modellemeleri</h4>
+    <div class="row mb-5 g-4">
+        {% for disease_key, result in results.items() %}
+        <div class="col-lg-4 col-md-6">
+            <div class="clinical-card risk-card risk-card-{{ result.get('risk_color', 'secondary') }} h-100">
+                <div class="clinical-card-header d-flex justify-content-between align-items-center bg-transparent">
+                    <h5 class="clinical-header-title mb-0">
+                        {{ t('diseases.' + disease_key) }}
+                    </h5>
+                    <i class="fas fa-{{ 'shield-virus' if disease_key == 'cirrhosis' else 'dna' if disease_key == 'hcc' else 'procedures' }} text-muted opacity-50 fa-lg"></i>
+                </div>
+                <div class="card-body">
+                    {% if result.get('error') %}
+                    <div class="alert alert-danger py-2 px-3 small" role="alert">
+                        <i class="fas fa-exclamation-triangle me-1"></i> {{ t('results.error') }}: {{ result.error }}
+                    </div>
+                    {% else %}
+                    
+                    <div class="text-center mb-4 mt-2">
+                        {% if result.get('classification') %}
+                            <!-- MAFLD (Sınıflandırma) için Risk Görünümü -->
+                            <h3 class="fw-bold text-{{ result.get('risk_color', 'secondary') }} mb-1">
+                                {% if result.get('classification') == 'NASH' %}
+                                    Yüksek Risk
+                                {% elif result.get('classification') == 'NAFL' %}
+                                    Düşük Risk
+                                {% else %}
+                                    {{ result.get('classification') }} Risk
+                                {% endif %}
+                            </h3>
+                            <!-- Tıbbi alt metni koruyalım -->
+                            <p class="text-muted small mb-0 fw-bold">
+                                Klinik Teşhis: {{ result.get('classification') }}
+                            </p>
+                            {% if result.get('classification_description') %}
+                            <p class="text-muted small mb-0">{{ result.get('classification_description', '') }}</p>
+                            {% endif %}
+                        {% else %}
+                            <!-- Normal Risk (Siroz, HCC) Görünümü -->
+                            <h3 class="fw-bold text-{{ result.get('risk_color', 'secondary') }} mb-1">
+                                {{ result.get('risk_level', t('results.unknown')) }} Risk
+                            </h3>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <!-- AKILLI BAR DOLDURMA MANTIĞI -->
+                        {% set raw_val = result.get('confidence') if result.get('classification') else result.get('risk_percentage', 0) %}
+                        {% set display_val = raw_val|float %}
+                        
+                        {# Eger model olasiligi 0 ile 1 arasi (orn: 0.8 veya 0.005) seklinde donduyse yuzdeye cevir #}
+                        {% if display_val > 0 and display_val <= 1.0 %}
+                            {% set display_val = display_val * 100 %}
+                        {% endif %}
+                        
+                        {# "Yuksek Risk" yazdigi halde barin cok kucuk yuzdede kalmasini (Gorsel Bug) duzelt #}
+                        {% set bar_width = display_val %}
+                        {% if result.get('risk_color') == 'danger' and display_val < 50 %}
+                            {% set bar_width = 85 %}
+                        {% elif result.get('risk_color') == 'warning' and display_val < 30 %}
+                            {% set bar_width = 50 %}
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="lab-label">Model Güven/Olasılık Skoru</span>
+                            <span class="fw-bold text-dark">{{ "%.1f"|format(display_val) }}%</span>
+                        </div>
+                        <div class="progress clinical-progress">
+                            <div class="progress-bar bg-{{ result.get('risk_color', 'secondary') }}" 
+                                 role="progressbar" 
+                                 style="width: {{ bar_width }}%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center text-muted small mt-4 pt-3 border-top">
+                        <i class="fas fa-microchip me-2"></i>
+                        <span class="text-truncate">{{ result.get('model_type', t('results.unknownModel')) }}</span>
+                    </div>
+
+                    {% if disease_key == 'hcc' and has_afp %}
+                    <div class="mt-2 pt-2">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle w-100 text-start py-2">
+                            <i class="fas fa-check-circle me-1"></i> AFP Destekli Hassas Analiz
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Gelişmiş XAI (Açıklanabilir Yapay Zeka) Modülü -->
+    {% for disease_key, result in results.items() %}
+        {% if result.xai %}
+        <div class="clinical-card border-info mb-5">
+            <div class="clinical-card-header bg-info bg-opacity-10 d-flex justify-content-between align-items-center">
+                <h5 class="clinical-header-title text-info mb-0">
+                    <i class="fas fa-network-wired me-2"></i>{{ t('diseases.' + disease_key) }} - Açıklanabilir Yapay Zeka (XAI) Raporu
+                </h5>
+                <span class="badge bg-info text-white rounded-pill px-3 py-2 shadow-sm">Klinik Karar Destek</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <!-- 1. Karar Matrisi -->
+                    <div class="col-lg-4">
+                        <div class="border rounded p-3 h-100 bg-white">
+                            <h6 class="fw-bold text-dark mb-1"><i class="fas fa-balance-scale text-primary me-2"></i>Klinik Karar Matrisi</h6>
+                            <p class="text-muted small mb-3 border-bottom pb-2">Modelin teşhiste ağırlık verdiği majör parametreler (SHAP Değerleri).</p>
+                            
+                            {% if result.xai.shap_plot %}
+                                <img src="data:image/png;base64,{{ result.xai.shap_plot }}" class="img-fluid rounded" alt="SHAP Plot">
+                            {% else %}
+                                <div class="d-flex align-items-center justify-content-center h-50 text-muted small bg-light rounded">Analiz grafiği oluşturuluyor...</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 2. Proaktif Etki -->
+                    <div class="col-lg-4">
+                        <div class="border rounded p-3 h-100 bg-white">
+                            <h6 class="fw-bold text-dark mb-1"><i class="fas fa-chart-line text-success me-2"></i>Proaktif Müdahale Projeksiyonu</h6>
+                            <p class="text-muted small mb-3 border-bottom pb-2">Parametrik iyileştirmelerin klinik riski düşürme potansiyeli.</p>
+                            
+                            {% if result.xai.impact_plot %}
+                                <img src="data:image/png;base64,{{ result.xai.impact_plot }}" class="img-fluid rounded" alt="Impact Plot">
+                            {% else %}
+                                <div class="d-flex align-items-center justify-content-center h-50 text-muted small bg-light rounded">Simülasyon hazırlanıyor...</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 3. Klinik Aksiyon Planı -->
+                    <div class="col-lg-4">
+                        <div class="border rounded p-3 h-100 bg-white shadow-sm">
+                            <h6 class="fw-bold text-dark mb-1"><i class="fas fa-tasks text-warning me-2"></i>Önerilen Terapötik Hedefler</h6>
+                            <p class="text-muted small mb-3 border-bottom pb-2">Risk skorunu optimize etmek için klinik hedef aralıkları.</p>
+                            
+                            <div class="d-flex flex-column gap-2 mt-3">
+                                {% if result.xai.actionable_insights %}
+                                    {% for insight in result.xai.actionable_insights %}
+                                    <div class="xai-insight-item p-2 border rounded">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold text-dark small">{{ insight.feature }}</span>
+                                            <span class="badge bg-success bg-opacity-25 text-success border border-success rounded-pill px-2">
+                                                <i class="fas fa-arrow-down me-1"></i>%{{ insight.impact }} Risk
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center small mt-2">
+                                            <div class="text-muted">Mevcut: <strong class="text-dark">{{ insight.current }}</strong></div>
+                                            <i class="fas fa-long-arrow-alt-right text-muted"></i>
+                                            <div class="text-primary">Hedef: <strong>&lt;{{ insight.target }}</strong></div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-4">
+                                        <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex p-3 mb-2">
+                                            <i class="fas fa-check text-success fa-lg"></i>
+                                        </div>
+                                        <p class="small text-muted mb-0">Mevcut veriler dahilinde acil terapötik majör risk saptanmadı.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Geleneksel Klinik Skorlamalar -->
+    {% if traditional_scores %}
+    <h4 class="mb-3 mt-5 text-dark fw-bold"><i class="fas fa-calculator text-primary me-2"></i>Geleneksel Tıbbi Skorlamalar</h4>
+    <div class="row mb-5 g-3">
+        {% for score_name, score_value in traditional_scores.items() %}
+        <div class="col-md-6 col-lg-3">
+            <div class="clinical-card h-100">
+                <div class="card-body p-3 d-flex flex-column text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <h6 class="text-muted fw-bold mb-0 text-uppercase" style="font-size: 0.85rem;">{{ score_name }}</h6>
+                        <i class="fas fa-info-circle ms-2 text-primary opacity-50" 
+                           data-bs-toggle="tooltip" 
+                           title="Klinik kılavuzlara dayalı {{ score_name }} referans bilgileri." style="cursor: help;"></i>
+                    </div>
+                    
+                    <div class="fs-3 fw-bold text-dark my-2">
+                        {% if score_value is number %}
+                            {{ "%.2f"|format(score_value) }}
+                        {% else %}
+                            {{ score_value }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mt-auto pt-3 border-top">
+                        <span class="badge bg-{{ score_interpretations[score_name]['color'] }} bg-opacity-10 text-{{ score_interpretations[score_name]['color'] }} border border-{{ score_interpretations[score_name]['color'] }} px-3 py-2 w-100 rounded-pill">
+                            {{ score_interpretations[score_name]['level'] }}
+                        </span>
+                        <p class="small text-muted mt-2 mb-0 lh-sm">{{ score_interpretations[score_name]['interpretation'] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Çift Yapay Zeka Paneli (Konsültasyon & Asistan) -->
+    <div class="row mb-5 g-4">
+        <!-- AI Konsültasyon Raporu -->
+        <div class="col-lg-6">
+            <div class="clinical-card h-100 border-primary">
+                <div class="clinical-card-header bg-primary text-white d-flex align-items-center">
+                    <i class="fas fa-user-md fa-lg me-3"></i>
+                    <h5 class="mb-0">Dijital Konsültasyon (LLM Analizi)</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-4">Seçtiğiniz yapay zeka modeli (LLM), hastanın demografik, laboratuvar ve risk verilerini sentezleyerek kapsamlı bir klinik değerlendirme raporu sunar.</p>
+                    
+                    <div class="mb-4">
+                        <label class="lab-label mb-2">Uzman Yapay Zeka Modelini Seçin</label>
+                        <div class="input-group">
+                            <select class="form-select bg-light border-end-0" id="doctorSelect">
+                                <option value="" selected disabled>Model Seçiniz...</option>
+                                <option value="smith">Dr. GPT-Mini (Hızlı / OpenAI)</option>
+                                <option value="johnson">Dr. GPT-4o (Uzman / OpenAI)</option>
+                                <option value="brown">Dr. Gemini (Flash / Google)</option>
+                            </select>
+                            <button class="btn btn-primary px-4" id="getAssessmentBtn" onclick="getAIAssessment()">
+                                <i class="fas fa-play me-2"></i>Analiz Et
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="assessmentLoading" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-primary mb-3" role="status"></div>
+                        <p class="text-muted fw-bold">Klinik veriler sentezleniyor...</p>
+                    </div>
+                    
+                    <div id="aiAssessmentResult" style="display: none;">
+                        <div class="bg-light p-3 rounded border border-primary border-opacity-25 shadow-sm">
+                            <h6 id="assessmentTitle" class="fw-bold text-primary mb-3 border-bottom pb-2"></h6>
+                            <div id="assessmentContent" class="small text-dark" style="line-height: 1.6;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HepDecide AI (RAG Chat) -->
+        <div class="col-lg-6">
+            <div class="clinical-card h-100 border-secondary">
+                <div class="clinical-card-header bg-light d-flex align-items-center border-bottom border-secondary border-opacity-25">
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded me-3 text-secondary">
+                        <i class="fas fa-robot fa-lg"></i>
+                    </div>
+                    <div>
+                        <h5 class="clinical-header-title text-secondary mb-0">HepDecide Klinik Asistan</h5>
+                        <span class="small text-muted">Karaciğer hastalıkları üzerine uzmanlaşmış dijital bilgi ortağınız</span>
+                    </div>
+                </div>
+                <div class="card-body p-0 d-flex flex-column" style="height: 450px;">
+                    <!-- Chat Geçmişi -->
+                    <div id="ragChatHistory" class="chat-container p-3 flex-grow-1 overflow-auto d-flex flex-column gap-3">
+                        <div class="d-flex justify-content-start">
+                            <div class="chat-bubble-ai p-3 rounded-3 shadow-sm" style="max-width: 85%;">
+                                <div class="text-secondary fw-bold small mb-1"><i class="fas fa-robot me-1"></i> HepDecide AI</div>
+                                <span class="small">Merhaba doktor. Hastanın verilerini inceledim. Kılavuzlara dayalı spesifik bir parametre analizi, ilaç etkileşimi veya hastalık prognozu hakkında ne sormak istersiniz?</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Alanı -->
+                    <div class="p-3 bg-white border-top">
+                        <div class="input-group">
+                            <textarea class="form-control form-control-sm bg-light" id="ragQuestionInput" rows="2" placeholder="Örn: Bu AST/ALT oranı ve Trombosit değeriyle siroz şüphesi nedir? Güncel kılavuz ne önerir?" style="resize: none;"></textarea>
+                            <button class="btn btn-secondary px-3" type="button" id="askRagBtn" onclick="askRAGQuestion()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tıbbi Uyarı -->
+    <div class="alert alert-warning bg-warning bg-opacity-10 border-warning border-start border-4 rounded-end py-3 px-4 mb-4 text-dark" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-balance-scale-right fa-2x text-warning me-3"></i>
+            <div class="small">
+                <strong class="d-block mb-1">{{ t('results.medicalDisclaimer') }}</strong> 
+                {{ t('results.disclaimerText') }} Bu sistem hekimin klinik yargısının yerine geçmez, sadece karar destek mekanizmasıdır.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Gizli Veri Alanı -->
+    <script id="pdf-data-json" type="application/json">
+        {{ {
+            'patient': patient_data,
+            'lab': lab_data if lab_data is defined else [],
+            'risk': risk_data if risk_data is defined else [],
+            'scores': scores_data if scores_data is defined else [],
+            'ai_assessment': ai_assessment if ai_assessment is defined else ''
+        } | tojson }}
+    </script>
+</div>
+
+<!-- SCRIPTS -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+// AI Konsültasyon Fonksiyonu
+function getAIAssessment() {
+    const doctorSelect = document.getElementById('doctorSelect');
+    const selectedDoctor = doctorSelect.value;
+    
+    if (!selectedDoctor) {
+        alert('Lütfen analiz için bir AI modeli seçiniz.');
+        return;
+    }
+    
+    document.getElementById('assessmentLoading').style.display = 'block';
+    document.getElementById('aiAssessmentResult').style.display = 'none';
+    document.getElementById('getAssessmentBtn').disabled = true;
+    
+    fetch('/get_ai_assessment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ doctor: selectedDoctor })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('assessmentLoading').style.display = 'none';
+        document.getElementById('getAssessmentBtn').disabled = false;
+        
+        if (data.success) {
+            document.getElementById('assessmentTitle').innerHTML = '<i class="fas fa-file-signature me-2"></i>' + data.title;
+            // Basit markdown formatlaması
+            let formattedContent = data.assessment.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            document.getElementById('assessmentContent').innerHTML = formattedContent;
+            window.aiResp = data.assessment;
+            document.getElementById('aiAssessmentResult').style.display = 'block';
+        } else {
+            alert('Hata: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('assessmentLoading').style.display = 'none';
+        document.getElementById('getAssessmentBtn').disabled = false;
+        alert('Analiz sırasında bağlantı hatası oluştu.');
+    });
+}
+
+// RAG AI Chat Fonksiyonu
+async function askRAGQuestion() {
+    const inputField = document.getElementById('ragQuestionInput');
+    const chatHistory = document.getElementById('ragChatHistory');
+    const question = inputField.value.trim();
+    const btn = document.getElementById('askRagBtn');
+
+    if (!question) return;
+
+    // Kullanıcı Mesajı
+    const userMsgHtml = `
+        <div class="d-flex justify-content-end">
+            <div class="chat-bubble-user p-3 rounded-3 shadow-sm" style="max-width: 85%;">
+                <div class="fw-bold small mb-1 opacity-75"><i class="fas fa-user-md me-1"></i> Siz</div>
+                <span class="small">${question}</span>
+            </div>
+        </div>
+    `;
+    chatHistory.insertAdjacentHTML('beforeend', userMsgHtml);
+    
+    inputField.value = '';
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    // AI Düşünüyor
+    const typingId = 'typing-' + Date.now();
+    const typingHtml = `
+        <div id="${typingId}" class="d-flex justify-content-start">
+            <div class="chat-bubble-ai p-2 rounded-3 text-muted small">
+                <i class="fas fa-circle-notch fa-spin text-secondary me-2"></i> Tıbbi veritabanı taranıyor...
+            </div>
+        </div>
+    `;
+    chatHistory.insertAdjacentHTML('beforeend', typingHtml);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+
+    try {
+        let patientDataObj = {};
+        try {
+            const pageDataRaw = document.getElementById('pdf-data-json').textContent;
+            patientDataObj = JSON.parse(pageDataRaw).patient || {};
+        } catch(e) {}
+
+        const response = await fetch('/ask_rag', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: question, patient_data: patientDataObj })
+        });
+
+        const data = await response.json();
+        document.getElementById(typingId).remove();
+
+        if (data.success) {
+            let formattedAnswer = data.answer.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-dark">$1</strong>');
+            const aiMsgHtml = `
+                <div class="d-flex justify-content-start">
+                    <div class="chat-bubble-ai p-3 rounded-3 shadow-sm" style="max-width: 90%;">
+                        <div class="text-secondary fw-bold small mb-2"><i class="fas fa-robot me-1"></i> HepDecide AI</div>
+                        <span class="small" style="line-height: 1.6;">${formattedAnswer}</span>
+                    </div>
+                </div>
+            `;
+            chatHistory.insertAdjacentHTML('beforeend', aiMsgHtml);
+        } else {
+            throw new Error(data.error || "Sunucu hatası.");
+        }
+    } catch (error) {
+        if(document.getElementById(typingId)) document.getElementById(typingId).remove();
+        const errorHtml = `
+            <div class="d-flex justify-content-start">
+                <div class="bg-danger text-white p-2 rounded-3 shadow-sm small">
+                    <i class="fas fa-exclamation-triangle me-1"></i> Bağlantı Hatası: ${error.message}
+                </div>
+            </div>
+        `;
+        chatHistory.insertAdjacentHTML('beforeend', errorHtml);
+    } finally {
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    }
+}
+
+document.getElementById('ragQuestionInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        askRAGQuestion();
+    }
+});
+</script>
+{% endblock %}

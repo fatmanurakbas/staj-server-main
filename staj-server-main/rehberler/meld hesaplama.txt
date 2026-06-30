@@ -1,0 +1,40 @@
+MELD Skoru Hesaplama sayfası
+MELD Skoru (Son Dönem Karaciğer Hastalığı Modeli) (12 ve üzeri)
+Nakil planlaması için son dönem karaciğer hastalığının ciddiyetini sınıflandırır.
+TALİMATLAR
+
+12+ yaşındaki hastalarda kullanın. Not: Ocak 2016 itibariyle MELD hesaplaması değişmiştir. Artık serum sodyum seviyesini içerir. OPTN'nin duyurusuna bakın.
+Ne Zaman Kullanılır
+Artıları / Eksileri
+Neden Kullanılır
+ 
+ 
+Geçen hafta en az iki kez diyaliz
+veya geçen hafta 24+ saat  CVVHD  
+Hayır
+Evet
+ 
+Creatinine
+Cr >4.0 mg/dL is automatically assigned a value of 4.0
+ 
+Norm: 62 - 115
+µmol/L
+ 
+Bilirubin
+ 
+Norm: 5,13 - 32,49
+µmol/L
+ 
+INR
+ 
+Norm: 0,8 - 1,2
+ 
+Sodium
+ 
+Norm: 136 - 145
+mmol/L
+ 
+puan
+MELD Puanı (2016)*
+%
+Tahmini 3 Aylık Mortalite
